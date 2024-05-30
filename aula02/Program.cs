@@ -7,6 +7,8 @@ List<PenalidadeAplicada>? penalidades = file.Read();
 if (penalidades == null)
     Environment.Exit(0);
 
+MongoRepository<PenalidadeDocument> mongoRepository = new("motorista", "penalidade");
+
 PenalidadeRepository repository = new(penalidades);
 
 Menu menu = new(
@@ -16,6 +18,7 @@ Menu menu = new(
     "Ordenar por razão social",
     "Inserir registros no SQLServer",
     "Gerar arquivos XMLs dos registros",
+    "Salvar registros do SQLServer no MongoDB",
     "Sair"
 );
 
@@ -61,6 +64,22 @@ while (true)
             Console.WriteLine(repository.ToXML());
             break;
         case 7:
+            List<PenalidadeAplicada> todasPenalidades = new PenalidadeAplicada().BuscarTodos();
+
+            mongoRepository.InsertMany(todasPenalidades.Select(penalidade => new PenalidadeDocument(penalidade)).ToList());
+
+            RegistroInsercao registro = new RegistroInsercao
+            {
+                Descricao = "Registro penalidade mongodb",
+                DataInsercao = DateTime.Now,
+                NumeroDeRegistrosInseridos = todasPenalidades.Count
+            };
+
+            registro.Inserir();
+
+            Console.WriteLine("Registros inseridos!");
+            break;
+        case 8:
             Environment.Exit(0);
             break;
     }

@@ -13,7 +13,7 @@ namespace aula02
 
         protected SqlConnection conexaoAtual;
 
-        private SqlCommand? Command(string query, Dictionary<string, object>? dados = null)
+        protected SqlCommand? Command(string query, Dictionary<string, object>? dados = null)
         {
             AbrirConexao();
 

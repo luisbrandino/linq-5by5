@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
+using System.Data;
 using System.Xml.Linq;
 
 namespace aula02
@@ -6,6 +8,7 @@ namespace aula02
     public class PenalidadeAplicada : Model
     {
         public override string Tabela { get; protected set; } = "tb_penalidade";
+
         public override string[] Colunas { get; protected set; } = new string[]
         {
             "cnpj",
@@ -20,7 +23,7 @@ namespace aula02
 
         [JsonProperty("cnpj")]
         public string Cnpj { get; set; }
-        
+
         [JsonProperty("nome_motorista")]
         public string NomeMotorista { get; set; }
 
@@ -29,7 +32,6 @@ namespace aula02
 
         [JsonProperty("vigencia_do_cadastro")]
         public DateTime VigenciaCadastro { get; set; }
-
 
         public Dictionary<string, object> ToDictionary()
         {
@@ -50,6 +52,25 @@ namespace aula02
             penalidades.ForEach(penalidade => penalidadesToDictionary.Add(penalidade.ToDictionary()));
 
             InserirVarios(penalidadesToDictionary);
+        }
+
+        public List<PenalidadeAplicada> BuscarTodos()
+        {
+            DataRowCollection penalidadesInDataRow = base.BuscarTodos();
+
+            List<PenalidadeAplicada> penalidades = new();
+
+            foreach (DataRow penalidade in penalidadesInDataRow)
+                penalidades.Add(new PenalidadeAplicada
+                {
+                    Cpf = (string) penalidade["cpf"],
+                    Cnpj = (string)penalidade["cnpj"],
+                    RazaoSocial = (string)penalidade["razao_social"],
+                    NomeMotorista = (string)penalidade["nome_motorista"],
+                    VigenciaCadastro = (DateTime)penalidade["data_vigencia"]
+                });
+
+            return penalidades;
         }
 
         public XElement ToXML() => new XElement("Penalidade",
